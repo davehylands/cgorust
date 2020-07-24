@@ -7,7 +7,6 @@
 package main
 
 /*
-#cgo CFLAGS: -g -Wall
 #cgo LDFLAGS: -Lperson/target/release -lperson
 #include "person.h"
 */
@@ -40,8 +39,6 @@ func main() {
 	var f *Person
 	f = GetPerson("tim", "tim hughes")
 	fmt.Printf("Hello Go rust world: My name is %s, %s.\n", C.GoString(f.name), C.GoString(f.long_name))
-
 	fmt.Printf("Hello Go ruat world: My name is %s, %s.\n", f.Name(), f.LongName())
-
 	FreePerson(f)
 }

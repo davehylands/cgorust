@@ -9,6 +9,7 @@ typedef struct APerson  {
 } APerson ;
 
 APerson *get_person(const char * name, const char * long_name);
+void free_person(APerson *person);
 */
 
 #[repr(C)]
@@ -52,11 +53,11 @@ pub fn get_person(name: *const c_char, long_name: *const c_char) -> *mut APerson
 
 #[no_mangle]
 pub extern "C" fn free_person(person: *mut APerson) {
-	unsafe {
+    unsafe {
         // Box::from_raw constructs a box from the object and takes ownership of it.
         // When the Box is dropped at the end of this function, the memory is released.
-		Box::from_raw(person);
-	}
+        Box::from_raw(person);
+    }
 }
 
 #[cfg(test)]
