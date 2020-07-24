@@ -44,12 +44,17 @@ impl fmt::Display for APerson {
 
 #[no_mangle]
 pub fn get_person(name: *const c_char, long_name: *const c_char) -> *mut APerson {
+    // Box::new allocates memory from the heap and places the Person object in it.
+    // Box::into_raw consumes the pointer from the Box and it becomes our resposibility
+    // to free that (which happens in free_person below).
     Box::into_raw(Box::new(APerson::new(name, long_name)))
 }
 
 #[no_mangle]
 pub extern "C" fn free_person(person: *mut APerson) {
 	unsafe {
+        // Box::from_raw constructs a box from the object and takes ownership of it.
+        // When the Box is dropped at the end of this function, the memory is released.
 		Box::from_raw(person);
 	}
 }
