@@ -43,21 +43,17 @@ impl fmt::Display for APerson {
     }
 }
 
+// See https://doc.rust-lang.org/std/boxed/index.html#memory-layout
+
 #[no_mangle]
-pub fn get_person(name: *const c_char, long_name: *const c_char) -> *mut APerson {
+pub fn get_person(name: *const c_char, long_name: *const c_char) -> Box<APerson> {
     // Box::new allocates memory from the heap and places the Person object in it.
-    // Box::into_raw consumes the pointer from the Box and it becomes our resposibility
-    // to free that (which happens in free_person below).
-    Box::into_raw(Box::new(APerson::new(name, long_name)))
+    Box::new(APerson::new(name, long_name))
 }
 
 #[no_mangle]
-pub extern "C" fn free_person(person: *mut APerson) {
-    unsafe {
-        // Box::from_raw constructs a box from the object and takes ownership of it.
-        // When the Box is dropped at the end of this function, the memory is released.
-        Box::from_raw(person);
-    }
+pub extern "C" fn free_person(_person: Option<Box<APerson>>) {
+    // When the Box is dropped at the end of this function, the memory is released.
 }
 
 #[cfg(test)]
@@ -71,7 +67,6 @@ mod tests {
         let name = CString::new("Name").unwrap();
         let long_name = CString::new("This is a long name").unwrap();
         let person = get_person(name.as_ptr(), long_name.as_ptr());
-        assert!(!person.is_null());
-        free_person(person);
+        free_person(Some(person));
     }
 }
