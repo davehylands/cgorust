@@ -9,10 +9,14 @@ package main
 /*
 #cgo LDFLAGS: -Lperson/target/release -lperson
 #include "person.h"
+
+// Forward declaration of the gateway function.
+void MyCallback_cgo(int num);
 */
 import "C"
 import (
 	"fmt"
+	"unsafe"
 )
 
 type (
@@ -35,10 +39,30 @@ func FreePerson(person *Person) {
 	C.free_person((*C.struct_APerson)(person))
 }
 
+//export MyCallback
+func MyCallback(num C.int) {
+
+	fmt.Printf("my_callback: num = %d\n", num)
+}
+
+func DoSomeWork() {
+	C.do_some_work((C.CallBackFuncPtr)(unsafe.Pointer(C.MyCallback_cgo)))
+}
+
+func DoSomeWork2() {
+	var cb_count C.int = 0
+
+	C.do_some_work((C.CallBackFuncPtr)(unsafe.Pointer(C.MyCallback_cgo)))
+
+	fmt.Printf("DoSomeWork: cb_count = %d\n", cb_count)
+}
+
 func main() {
 	var f *Person
 	f = GetPerson("tim", "tim hughes")
 	fmt.Printf("Hello Go rust world: My name is %s, %s.\n", C.GoString(f.name), C.GoString(f.long_name))
 	fmt.Printf("Hello Go ruat world: My name is %s, %s.\n", f.Name(), f.LongName())
 	FreePerson(f)
+
+	DoSomeWork()
 }

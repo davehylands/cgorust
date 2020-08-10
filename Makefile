@@ -2,7 +2,7 @@
 all: test main run
 
 main: lib
-	go build main.go
+	go build
 
 lib:
 	cargo build --release --manifest-path=person/Cargo.toml
@@ -15,4 +15,4 @@ clean:
 	cargo clean --manifest-path=person/Cargo.toml
 
 run:
-	./main
+	./cgorust

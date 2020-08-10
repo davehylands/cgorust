@@ -16,4 +16,7 @@ typedef struct APerson  {
 APerson *get_person(const char * name, const char * long_name);
 void free_person(APerson *person);
 
+typedef void (*CallBackFuncPtr)(int num);
+void do_some_work(CallBackFuncPtr cb_func);
+
 #endif /* !PERSON_H */
