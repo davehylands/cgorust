@@ -7,16 +7,19 @@
 package main
 
 /*
-#cgo LDFLAGS: -Lperson/target/release -lperson
+#cgo LDFLAGS: -Lperson/target/debug -lperson
 #include "person.h"
 
 // Forward declaration of the gateway function.
 void MyCallback_cgo(int num);
+void MyCallback2_cgo(void *cb_data, int num);
 */
 import "C"
 import (
 	"fmt"
 	"unsafe"
+
+	gopointer "github.com/mattn/go-pointer"
 )
 
 type (
@@ -45,6 +48,14 @@ func MyCallback(num C.int) {
 	fmt.Printf("my_callback: num = %d\n", num)
 }
 
+//export MyCallback2
+func MyCallback2(cb_data unsafe.Pointer, num C.int) {
+	cbCountPtr := gopointer.Restore(cb_data).(*C.int)
+	fmt.Printf("my_callback2: num = %d cb_count = %d\n", num, *cbCountPtr)
+	*cbCountPtr = *cbCountPtr + 1
+	fmt.Printf("my_callback2: num = %d cb_count = %d\n", num, *cbCountPtr)
+}
+
 func DoSomeWork() {
 	C.do_some_work((C.CallBackFuncPtr)(unsafe.Pointer(C.MyCallback_cgo)))
 }
@@ -52,9 +63,14 @@ func DoSomeWork() {
 func DoSomeWork2() {
 	var cb_count C.int = 0
 
-	C.do_some_work((C.CallBackFuncPtr)(unsafe.Pointer(C.MyCallback_cgo)))
+	p := gopointer.Save(&cb_count)
+	defer gopointer.Unref(p)
 
-	fmt.Printf("DoSomeWork: cb_count = %d\n", cb_count)
+	fmt.Printf("DoSomeWork2: p = %p, sizeof(p) = %d\n", p, unsafe.Sizeof(p))
+
+	C.do_some_work2((C.CallBackFuncPtr2)(unsafe.Pointer(C.MyCallback2_cgo)), p)
+
+	fmt.Printf("DoSomeWork2: cb_count = %d\n", cb_count)
 }
 
 func main() {
@@ -65,4 +81,5 @@ func main() {
 	FreePerson(f)
 
 	DoSomeWork()
+	DoSomeWork2()
 }

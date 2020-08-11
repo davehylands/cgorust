@@ -13,9 +13,19 @@ package main
 // The gateway function
 void MyCallback_cgo(int num)
 {
-	printf("C.myCallback_cgo: called with arg = %d\n", num);
+	printf("C.myCallback_cgo: called with num = %d\n", num);
+	fflush(stdout);
 	void MyCallback(int);
 	MyCallback(num);
+}
+
+void MyCallback2_cgo(void *cb_data, int num)
+{
+	printf("C.myCallback2_cgo: called with num = %d\n", num);
+	printf("C.myCallback2_cgo: called with cb_data = %lx num = %x\n", (unsigned long)cb_data, num);
+	fflush(stdout);
+	void MyCallback2(void *cb_data, int num);
+	MyCallback2(cb_data, num);
 }
 */
 import "C"
